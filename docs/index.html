@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Indian Sign Language Translation & Recognition Platform</title>
+  <meta name="description" content="Indian Sign Language Translation, Gloss Recognition & Query-Based Video Search Platform — Baseline fingerspelling recognition with future temporal word-sign recognition.">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Site Header -->
+  <header class="site-header">
+    <div class="container header-content">
+      <a href="#" class="brand">
+        <span>ISL Recognition Platform</span>
+        <span class="brand-badge">Baseline v1</span>
+      </a>
+      <nav class="main-nav">
+        <a href="#overview">Overview</a>
+        <a href="#baseline">Baseline</a>
+        <a href="#architecture">Architecture</a>
+        <a href="#quickstart">Quick Start</a>
+        <a href="#colab">Colab</a>
+        <a href="#roadmap">Roadmap</a>
+        <a href="https://github.com/yash249114/Indian-Sign-Language-Translation" target="_blank" class="btn btn-outline" style="padding: 6px 14px; font-size: 0.85rem;">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <header class="hero">
+    <div class="container">
+      <span class="hero-tag">Academic Research & Engineering Baseline</span>
+      <h1>Indian Sign Language Translation, Gloss Recognition & Query-Based Video Search Platform</h1>
+      <p class="subtitle">Real-Time ISL Recognition • Multimodal AI • Temporal Sign Understanding</p>
+
+      <div class="hero-actions">
+        <a href="https://github.com/yash249114/Indian-Sign-Language-Translation" target="_blank" class="btn btn-primary" id="btn-github">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          Open GitHub Repository
+        </a>
+        <a href="https://colab.research.google.com/github/yash249114/Indian-Sign-Language-Translation/blob/baseline-v1-team/notebooks/ISL_Baseline_Colab.ipynb" target="_blank" class="btn btn-colab" id="btn-colab">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1010 10A10 10 0 0012 2zm1 14.5h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          Open in Google Colab
+        </a>
+        <button class="btn btn-outline" id="btn-run-locally">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+          Run Locally
+        </button>
+      </div>
+
+      <div class="banner-notice">
+        <strong>Notice:</strong> GitHub Pages hosts the project documentation and static project portal. The current real-time recognition backend runs locally through FastAPI.
+      </div>
+    </div>
+  </header>
+
+  <!-- Section 1: Overview -->
+  <section id="overview">
+    <div class="container">
+      <div class="section-header">
+        <h2>1. Overview</h2>
+        <p>A multimodal Indian Sign Language system designed for real-time edge processing and accessibility.</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3 class="card-title">Engineering Mission</h3>
+          <div class="card-body">
+            This platform bridges communication barriers for the deaf and hard-of-hearing community in India. By tracking hand kinematics via standard webcams, normalising 3D anatomical landmarks, and classifying gestures with high precision, the system constructs words and phrases, translates them into regional Indian languages, and synthesizes local speech.
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">Production Design Principles</h3>
+          <div class="card-body">
+            <ul>
+              <li><strong>Zero Cloud Inference for Vision</strong>: MediaPipe and neural classification run 100% on the local CPU.</li>
+              <li><strong>State-Machine Stabilization</strong>: Guaranteed single-character emission during held gestures.</li>
+              <li><strong>Resilient Language Layer</strong>: Gemini 3.5 Flash Lite translation with automatic offline lexicon fallback.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 2: Current Baseline -->
+  <section id="baseline">
+    <div class="container">
+      <div class="section-header">
+        <h2>2. Current Baseline (v1 Release)</h2>
+        <p>Verified capabilities implemented in the active codebase.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <p style="margin-bottom: 16px;">
+            <strong>Current baseline: fingerspelling recognition A-Z and 1-9.</strong>
+          </p>
+          <p style="margin-bottom: 16px;">
+            The active model is a deep Multi-Layer Perceptron (MLP) trained on 63-dimensional normalized single-hand coordinates. It recognizes 35 static sign classes with <strong>99.36% test accuracy</strong> and sub-2ms CPU inference latency.
+          </p>
+          <div class="banner-notice" style="margin: 0; background: #eff6ff; border-color: #bfdbfe; color: #1e40af; border-left-color: #2563eb;">
+            <strong>Scope Boundary:</strong> Word-level temporal sign recognition and continuous signing are future development stages and are not included in Baseline v1.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 3: Architecture -->
+  <section id="architecture">
+    <div class="container">
+      <div class="section-header">
+        <h2>3. System Architecture</h2>
+        <p>End-to-end dataflow from camera ingestion to speech synthesis.</p>
+      </div>
+
+      <div class="architecture-box">
+        <div class="flow-step-list">
+          <div class="flow-step">
+            <div class="step-num">1</div>
+            <div class="step-info">
+              <h4>Camera Ingestion</h4>
+              <p>Captures video frames via browser WebRTC or WebSocket at 30 FPS.</p>
+            </div>
+          </div>
+
+          <div class="flow-step">
+            <div class="step-num">2</div>
+            <div class="step-info">
+              <h4>MediaPipe Hands</h4>
+              <p>Locates 21 3D hand landmarks $(x, y, z)$ with on-device sub-15ms processing.</p>
+            </div>
+          </div>
+
+          <div class="flow-step">
+            <div class="step-num">3</div>
+            <div class="step-info">
+              <h4>63D Geometric Normalization</h4>
+              <p>Centers coordinates at the wrist origin $(0, 0, 0)$ and scales by max Euclidean distance for scale/translation invariance.</p>
+            </div>
+          </div>
+
+          <div class="flow-step">
+            <div class="step-num">4</div>
+            <div class="step-info">
+              <h4>Static MLP Classifier</h4>
+              <p>Computes softmax probabilities across 35 fingerspelling classes (`1`–`9`, `A`–`Z`).</p>
+            </div>
+          </div>
+
+          <div class="flow-step">
+            <div class="step-num">5</div>
+            <div class="step-info">
+              <h4>Temporal Stabilizer & State Machine</h4>
+              <p>Requires 60% majority consensus over a 6-frame rolling window; emits a sign exactly once and enters cooldown.</p>
+            </div>
+          </div>
+
+          <div class="flow-step">
+            <div class="step-num">6</div>
+            <div class="step-info">
+              <h4>Text Buffer Accumulator</h4>
+              <p>Manages live text composition with append, space, backspace, and clear operations.</p>
+            </div>
+          </div>
+
+          <div class="flow-step">
+            <div class="step-num">7</div>
+            <div class="step-info">
+              <h4>Multilingual Translation & TTS</h4>
+              <p>Translates into Telugu, Hindi, Tamil, Kannada, and Marathi via Gemini 3.5 Flash Lite with local offline pyttsx3 speech audio.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 4: Current Features -->
+  <section id="features">
+    <div class="container">
+      <div class="section-header">
+        <h2>4. Current Features</h2>
+        <p>Empirically verified capabilities backed by 49 automated unit and acceptance tests.</p>
+      </div>
+
+      <div class="grid-3">
+        <div class="card">
+          <h4 class="card-title">35 Fingerspelling Classes</h4>
+          <p class="card-body">High-precision recognition of digits 1-9 and letters A-Z at 99.36% test accuracy.</p>
+        </div>
+
+        <div class="card">
+          <h4 class="card-title">Debounce State Machine</h4>
+          <p class="card-body">Eliminates character duplication bugs by enforcing neutral-state transitions before new emissions.</p>
+        </div>
+
+        <div class="card">
+          <h4 class="card-title">5 Indian Languages</h4>
+          <p class="card-body">Native support for Telugu (`te`), Hindi (`hi`), Tamil (`ta`), Kannada (`kn`), and Marathi (`mr`).</p>
+        </div>
+
+        <div class="card">
+          <h4 class="card-title">Zero Cloud Vision</h4>
+          <p class="card-body">All computer vision and landmark classification run entirely on standard commodity CPUs.</p>
+        </div>
+
+        <div class="card">
+          <h4 class="card-title">Local Speech Synthesis</h4>
+          <p class="card-body">Offline text-to-speech audio caching generates clear speech without third-party fees.</p>
+        </div>
+
+        <div class="card">
+          <h4 class="card-title">Dataset Collection Tooling</h4>
+          <p class="card-body">Built-in multi-signer video and landmark capture pipeline with zero-leakage manifest validation.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 5: Dataset -->
+  <section id="dataset">
+    <div class="container">
+      <div class="section-header">
+        <h2>5. Dataset Architecture</h2>
+        <p>Fingerspelling images and landmark representations.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <ul style="padding-left: 20px; line-height: 1.8;">
+            <li><strong>Raw Alphabet Dataset</strong>: 42,000 images across 35 classes (1,200 images per class).</li>
+            <li><strong>Processed Feature Splits</strong>: 4,136 extracted 63D landmark vectors partitioned into:
+              <ul>
+                <li><code>train.npz</code>: 2,895 samples</li>
+                <li><code>val.npz</code>: 620 samples</li>
+                <li><code>test.npz</code>: 621 samples</li>
+              </ul>
+            </li>
+            <li><strong>Label Map</strong>: <code>data/processed/landmarks/label_map.json</code> mapping numeric indices to character labels.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 6: Technology Stack -->
+  <section id="tech-stack">
+    <div class="container">
+      <div class="section-header">
+        <h2>6. Technology Stack</h2>
+        <p>Core frameworks, libraries, and runtime dependencies.</p>
+      </div>
+
+      <div class="tech-badges">
+        <span class="badge">Python 3.10</span>
+        <span class="badge">FastAPI 0.115.6</span>
+        <span class="badge">Uvicorn 0.34.0</span>
+        <span class="badge">MediaPipe 0.10.14</span>
+        <span class="badge">Scikit-Learn 1.5.0</span>
+        <span class="badge">PyTorch 2.9.1</span>
+        <span class="badge">OpenCV 4.8.1</span>
+        <span class="badge">NumPy 1.26.4</span>
+        <span class="badge">Gemini 3.5 Flash Lite</span>
+        <span class="badge">pyttsx3 Offline TTS</span>
+        <span class="badge">Pytest 8.2.2</span>
+        <span class="badge">Vanilla HTML5/CSS3/ES6</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 7: Team Quick Start -->
+  <section id="quickstart">
+    <div class="container">
+      <div class="section-header">
+        <h2>7. Team Quick Start</h2>
+        <p>Instructions for running the verified baseline locally.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <p><strong>1. Clone the repository and checkout the team branch:</strong></p>
+          <div class="code-block">
+            <button class="copy-btn" data-target="cmd-clone">Copy</button>
+            <pre id="cmd-clone">git clone https://github.com/yash249114/Indian-Sign-Language-Translation.git
+cd Indian-Sign-Language-Translation
+git checkout baseline-v1-team</pre>
+          </div>
+
+          <p style="margin-top: 16px;"><strong>2. Create virtual environment & install requirements:</strong></p>
+          <div class="code-block">
+            <button class="copy-btn" data-target="cmd-install">Copy</button>
+            <pre id="cmd-install">python -m venv venv
+# Windows: .\venv\Scripts\activate | Linux: source venv/bin/activate
+pip install -r requirements.txt</pre>
+          </div>
+
+          <p style="margin-top: 16px;"><strong>3. Start the application:</strong></p>
+          <div class="code-block">
+            <button class="copy-btn" data-target="cmd-run">Copy</button>
+            <pre id="cmd-run">python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000</pre>
+          </div>
+
+          <p style="margin-top: 16px;"><strong>4. Execute the automated test suite:</strong></p>
+          <div class="code-block">
+            <button class="copy-btn" data-target="cmd-test">Copy</button>
+            <pre id="cmd-test">python -m pytest tests/ -v</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 8: Google Colab -->
+  <section id="colab">
+    <div class="container">
+      <div class="section-header">
+        <h2>8. Google Colab Cloud Notebook</h2>
+        <p>Reproducible experimentation without local GPU or camera setup.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <p style="margin-bottom: 16px;">
+            The official Colab notebook clones the project repository, installs headless dependencies, inspects landmark datasets, extracts features with MediaPipe on sample images, runs MLP inference, and evaluates the test split.
+          </p>
+          <a href="https://colab.research.google.com/github/yash249114/Indian-Sign-Language-Translation/blob/baseline-v1-team/notebooks/ISL_Baseline_Colab.ipynb" target="_blank" class="btn btn-colab">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1010 10A10 10 0 0012 2zm1 14.5h-2v-2h2zm0-4h-2V7h2z"/></svg>
+            Launch ISL_Baseline_Colab.ipynb
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 9: Limitations -->
+  <section id="limitations">
+    <div class="container">
+      <div class="section-header">
+        <h2>9. Current Limitations</h2>
+        <p>Explicit project boundaries for Baseline v1.</p>
+      </div>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Subsystem</th>
+            <th>Current Status</th>
+            <th>Technical Reality</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Isolated Fingerspelling</strong></td>
+            <td><span class="status-tag status-verified">VERIFIED</span></td>
+            <td>Recognizes static characters A-Z and digits 1-9 accurately.</td>
+          </tr>
+          <tr>
+            <td><strong>Temporal Word Signs</strong></td>
+            <td><span class="status-tag status-future">FUTURE</span></td>
+            <td>No real human multi-signer video dataset collected yet. Structural model implemented.</td>
+          </tr>
+          <tr>
+            <td><strong>Continuous Sentence Signing</strong></td>
+            <td><span class="status-tag status-future">FUTURE</span></td>
+            <td>Requires neutral-pose pauses between signs. Continuous sentence decoding is planned for Phase 3.</td>
+          </tr>
+          <tr>
+            <td><strong>Video Search Engine</strong></td>
+            <td><span class="status-tag status-future">FUTURE</span></td>
+            <td>Query-based ISL video retrieval will be developed in Phase 4.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Section 10: Roadmap -->
+  <section id="roadmap">
+    <div class="container">
+      <div class="section-header">
+        <h2>10. Future Development Roadmap</h2>
+        <p>Staged milestones for the upcoming research and engineering phases.</p>
+      </div>
+
+      <div class="grid-3">
+        <div class="card">
+          <h4 class="card-title">Phase 2: Word Signs</h4>
+          <p class="card-body">Record multi-signer video clips for 12 target glosses; train Bi-GRU and TCN temporal models with signer-independent validation.</p>
+        </div>
+
+        <div class="card">
+          <h4 class="card-title">Phase 3: Continuous Signing</h4>
+          <p class="card-body">Implement CTC sequence modeling and MediaPipe Face Mesh non-manual grammatical cues for full sentence transcription.</p>
+        </div>
+
+        <div class="card">
+          <h4 class="card-title">Phase 4: Video Search</h4>
+          <p class="card-body">Build multimodal landmark embedding indexes for educational ISL archives with text and sign query matching.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modal for Run Locally -->
+  <div class="modal-overlay" id="run-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Run Baseline Locally</h3>
+        <button class="close-btn" id="modal-close-btn">&times;</button>
+      </div>
+      <p style="margin-bottom: 12px; color: var(--text-muted);">
+        Execute this command from your project root inside an activated virtual environment:
+      </p>
+      <div class="code-block">
+        <button class="copy-btn" data-target="modal-cmd">Copy</button>
+        <pre id="modal-cmd">python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000</pre>
+      </div>
+      <p style="margin-top: 12px; font-size: 0.9rem; color: var(--text-muted);">
+        Then open <code>http://127.0.0.1:8000/</code> in your browser to access the live camera interface.
+      </p>
+    </div>
+  </div>
+
+  <!-- Site Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <p>Indian Sign Language Translation, Gloss Recognition & Query-Based Video Search Platform</p>
+      <p style="margin-top: 6px; font-size: 0.8rem; color: var(--text-subtle);">
+        Baseline v1 Team Release • Academic Capstone Research • Open-Source MIT License
+      </p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

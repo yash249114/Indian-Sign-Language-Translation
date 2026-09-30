@@ -1,0 +1,22 @@
+{
+    "mlp": {
+        "model_path": "models/trained/sign_classifier/mlp_classifier.joblib",
+        "training_time_seconds": 4.652,
+        "val_accuracy": 0.9968,
+        "val_weighted_f1": 0.9968,
+        "num_layers": 4,
+        "hidden_layers": [
+            128,
+            64
+        ],
+        "iterations_trained": 45
+    },
+    "random_forest": {
+        "model_path": "models/trained/sign_classifier/rf_baseline.joblib",
+        "training_time_seconds": 0.87,
+        "val_accuracy": 0.9936,
+        "val_weighted_f1": 0.9935,
+        "n_estimators": 100,
+        "max_depth": 20
+    }
+}

@@ -1,0 +1,283 @@
+{
+  "architecture": "bigru",
+  "dataset_split_strategy": "Signer-Independent (Trained on signers 01/02, Tested on unseen signer 04)",
+  "train_samples": 480,
+  "val_samples": 240,
+  "test_samples": 240,
+  "num_classes": 12,
+  "test_accuracy": 0.9208,
+  "macro_f1": 0.9132,
+  "mean_inference_latency_ms": 0.49,
+  "training_time_seconds": 45.71,
+  "per_class_metrics": {
+    "HELLO": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 20.0
+    },
+    "THANK_YOU": {
+      "precision": 0.9090909090909091,
+      "recall": 1.0,
+      "f1-score": 0.9523809523809523,
+      "support": 20.0
+    },
+    "HELP": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 20.0
+    },
+    "YES": {
+      "precision": 1.0,
+      "recall": 0.7,
+      "f1-score": 0.8235294117647058,
+      "support": 20.0
+    },
+    "NO": {
+      "precision": 1.0,
+      "recall": 0.35,
+      "f1-score": 0.5185185185185185,
+      "support": 20.0
+    },
+    "PLEASE": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 20.0
+    },
+    "GOOD": {
+      "precision": 0.8333333333333334,
+      "recall": 1.0,
+      "f1-score": 0.9090909090909091,
+      "support": 20.0
+    },
+    "WATER": {
+      "precision": 0.6060606060606061,
+      "recall": 1.0,
+      "f1-score": 0.7547169811320755,
+      "support": 20.0
+    },
+    "FOOD": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 20.0
+    },
+    "YOU": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 20.0
+    },
+    "ME": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 20.0
+    },
+    "NAME": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 20.0
+    },
+    "accuracy": 0.9208333333333333,
+    "macro avg": {
+      "precision": 0.9457070707070706,
+      "recall": 0.9208333333333334,
+      "f1-score": 0.9131863977405968,
+      "support": 240.0
+    },
+    "weighted avg": {
+      "precision": 0.9457070707070707,
+      "recall": 0.9208333333333333,
+      "f1-score": 0.9131863977405968,
+      "support": 240.0
+    }
+  },
+  "confusion_matrix": [
+    [
+      20,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      20,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      20,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      2,
+      0,
+      14,
+      0,
+      0,
+      4,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      7,
+      0,
+      0,
+      13,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      20,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      20,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      20,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      20,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      20,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      20,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      20
+    ]
+  ],
+  "classes": [
+    "HELLO",
+    "THANK_YOU",
+    "HELP",
+    "YES",
+    "NO",
+    "PLEASE",
+    "GOOD",
+    "WATER",
+    "FOOD",
+    "YOU",
+    "ME",
+    "NAME"
+  ]
+}

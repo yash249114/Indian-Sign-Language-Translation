@@ -1,0 +1,26 @@
+{
+  "classes": [
+    "HELLO",
+    "THANK_YOU",
+    "HELP",
+    "YES",
+    "NO",
+    "PLEASE",
+    "GOOD",
+    "WATER",
+    "FOOD",
+    "YOU",
+    "ME",
+    "NAME"
+  ],
+  "feature_dim": 126,
+  "sequence_length": 30,
+  "normalization": "wrist_centered_max_distance_scale_invariant",
+  "model_type": "BiGRU",
+  "train_samples": 480,
+  "val_samples": 240,
+  "test_samples": 240,
+  "best_val_accuracy": 1.0,
+  "trained_date": "2026-09-30 10:34:50",
+  "is_real_human_dataset": false
+}

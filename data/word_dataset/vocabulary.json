@@ -1,0 +1,117 @@
+{
+  "version": "1.0",
+  "source": "ISLRTC / NCERT Indian Sign Language Dictionary Standards",
+  "domain": "Everyday Conversational ISL (Essential Lexicon)",
+  "vocabulary": [
+    {
+      "gloss": "HELLO",
+      "category": "greeting",
+      "handedness": "one-handed",
+      "dominant_hand": "open-palm-5",
+      "motion": "Forward arc from temple/forehead outward toward interlocutor",
+      "grammatical_role": "greeting",
+      "verified_reference": "ISLRTC ISL Dictionary Volume 1"
+    },
+    {
+      "gloss": "THANK_YOU",
+      "category": "politeness",
+      "handedness": "one-handed",
+      "dominant_hand": "flat-B",
+      "motion": "Fingertips touch chin/mouth then extend outward toward recipient",
+      "grammatical_role": "courtesy_marker",
+      "verified_reference": "ISLRTC ISL Dictionary Volume 1"
+    },
+    {
+      "gloss": "HELP",
+      "category": "action/request",
+      "handedness": "two-handed",
+      "dominant_hand": "A-thumb-up",
+      "non_dominant_hand": "flat-B-palm-up",
+      "motion": "Dominant fist rests on non-dominant palm, both elevate upward together",
+      "grammatical_role": "verb",
+      "verified_reference": "NCERT ISL Lexicon"
+    },
+    {
+      "gloss": "YES",
+      "category": "affirmation",
+      "handedness": "one-handed",
+      "dominant_hand": "S-fist",
+      "motion": "Wrist nods fist forward and down in affirmative head-nod motion",
+      "grammatical_role": "discourse_marker",
+      "verified_reference": "ISLRTC ISL Dictionary Volume 2"
+    },
+    {
+      "gloss": "NO",
+      "category": "negation",
+      "handedness": "one-handed",
+      "dominant_hand": "modified-U",
+      "motion": "Index and middle fingers snap down against thumb or side-to-side shake",
+      "grammatical_role": "negative_marker",
+      "verified_reference": "ISLRTC ISL Dictionary Volume 1"
+    },
+    {
+      "gloss": "PLEASE",
+      "category": "request",
+      "handedness": "one-handed",
+      "dominant_hand": "flat-B",
+      "motion": "Open palm placed on center of chest makes circular smoothing motion",
+      "grammatical_role": "politeness_marker",
+      "verified_reference": "ISLRTC ISL Dictionary Volume 2"
+    },
+    {
+      "gloss": "GOOD",
+      "category": "evaluation",
+      "handedness": "one-handed",
+      "dominant_hand": "thumb-up",
+      "motion": "Thumb up gesture held firmly or moving forward slightly",
+      "grammatical_role": "adjective",
+      "verified_reference": "NCERT ISL Lexicon"
+    },
+    {
+      "gloss": "WATER",
+      "category": "entity/noun",
+      "handedness": "one-handed",
+      "dominant_hand": "W-handshape",
+      "motion": "Index, middle, and ring fingers upright (W), index taps side of chin twice",
+      "grammatical_role": "noun",
+      "verified_reference": "ISLRTC ISL Dictionary Volume 1"
+    },
+    {
+      "gloss": "FOOD",
+      "category": "entity/action",
+      "handedness": "one-handed",
+      "dominant_hand": "bunched-O",
+      "motion": "Fingertips brought together into bunched shape and brought to mouth twice",
+      "grammatical_role": "noun/verb",
+      "verified_reference": "ISLRTC ISL Dictionary Volume 1"
+    },
+    {
+      "gloss": "YOU",
+      "category": "pronoun/deixis",
+      "handedness": "one-handed",
+      "dominant_hand": "index-1",
+      "motion": "Dominant index finger points directly forward at conversational partner",
+      "grammatical_role": "pronoun",
+      "verified_reference": "ISLRTC ISL Linguistic Analysis"
+    },
+    {
+      "gloss": "ME",
+      "category": "pronoun/deixis",
+      "handedness": "one-handed",
+      "dominant_hand": "index-1",
+      "motion": "Dominant index finger points inward touching center of chest",
+      "grammatical_role": "pronoun",
+      "verified_reference": "ISLRTC ISL Linguistic Analysis"
+    },
+    {
+      "gloss": "NAME",
+      "category": "identity/question",
+      "handedness": "two-handed",
+      "dominant_hand": "H-handshape",
+      "non_dominant_hand": "H-handshape",
+      "motion": "Index and middle fingers of dominant hand tap those of non-dominant hand",
+      "grammatical_role": "noun",
+      "verified_reference": "ISLRTC ISL Dictionary Volume 1"
+    }
+  ]
+}

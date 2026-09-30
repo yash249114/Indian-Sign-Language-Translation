@@ -1,0 +1,94 @@
+{
+  "timestamp": "2026-09-30 10:15:34",
+  "hardware": {
+    "platform": "win32",
+    "python_version": "3.10.11",
+    "torch_version": "2.9.1+cpu",
+    "cpu_execution": true
+  },
+  "fingerspelling_module": {
+    "model_type": "Deep MLP (63D)",
+    "num_classes": 35,
+    "test_samples": 621,
+    "top1_accuracy": 0.9936,
+    "macro_f1": 0.9936,
+    "mean_latency_ms": 0.082,
+    "p95_latency_ms": 0.136
+  },
+  "temporal_word_module": {
+    "TemporalCNN": {
+      "top1_accuracy": 1.0,
+      "macro_f1": 1.0,
+      "mean_latency_ms": 1.873,
+      "p95_latency_ms": 2.184,
+      "parameters": 100428
+    },
+    "BiGRUClassifier": {
+      "top1_accuracy": 0.9208,
+      "macro_f1": 0.9132,
+      "mean_latency_ms": 5.8,
+      "p95_latency_ms": 6.438,
+      "parameters": 149901
+    }
+  },
+  "isl_grammar_module": {
+    "rule_coverage_accuracy": 1.0,
+    "mean_parsing_latency_ms": 0.016,
+    "test_evaluations": [
+      {
+        "glosses": [
+          "HELLO"
+        ],
+        "interpreted_english": "Hello!",
+        "syntactic_structure": "GREETING",
+        "is_canonical": true,
+        "uncertainty_flagged": false
+      },
+      {
+        "glosses": [
+          "ME",
+          "WATER"
+        ],
+        "interpreted_english": "I want water.",
+        "syntactic_structure": "TOPIC + OBJECT_NEED",
+        "is_canonical": true,
+        "uncertainty_flagged": false
+      },
+      {
+        "glosses": [
+          "YOU",
+          "NAME"
+        ],
+        "interpreted_english": "What is your name?",
+        "syntactic_structure": "TOPIC + IDENTITY",
+        "is_canonical": true,
+        "uncertainty_flagged": false
+      },
+      {
+        "glosses": [
+          "PLEASE",
+          "HELP"
+        ],
+        "interpreted_english": "Please help me.",
+        "syntactic_structure": "POLITENESS + PREDICATE",
+        "is_canonical": true,
+        "uncertainty_flagged": false
+      },
+      {
+        "glosses": [
+          "FOOD",
+          "GOOD"
+        ],
+        "interpreted_english": "Food good.",
+        "syntactic_structure": "ENTITY + DESCRIPTOR",
+        "is_canonical": false,
+        "uncertainty_flagged": true
+      }
+    ]
+  },
+  "component_latencies": {
+    "landmark_normalization_ms": 0.0233,
+    "translation_cache_hit_ms": 1072.606,
+    "tts_synthesis_ms": 341.12
+  }
+}

@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indian Sign Language Translation & Gloss Recognition Platform</title>
+    <meta name="description" content="Real-time Indian Sign Language character & temporal word sign recognition with ISL grammar, Gemini 3.5 Flash Lite translation, and offline TTS.">
+    <!-- Google Fonts: Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="logo-group">
+                    <div class="logo-icon">ISL</div>
+                    <div>
+                        <h1 class="project-title">Indian Sign Language Multimodal AI Platform</h1>
+                        <p class="project-subtitle">Real-Time Sign Recognition, Temporal Glossing, ISL Grammar, Gemini Translation & Local TTS</p>
+                    </div>
+                </div>
+                <div class="badges-row">
+                    <span class="badge badge-success"><span class="pulse-dot"></span> 100% Local Vision</span>
+                    <span class="badge badge-blue">Gemini 3.5 Flash Lite</span>
+                    <span class="badge badge-purple" id="modelBadge">Temporal CNN + MLP</span>
+                    <span class="badge badge-dark" id="vocabBadge">35 Letters | 12 Words</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Mode Selector Toolbar -->
+        <div class="mode-selector-bar">
+            <div class="mode-left">
+                <span class="mode-label">Operational Mode:</span>
+                <div class="mode-btn-group">
+                    <button id="modeFingerspellingBtn" class="mode-btn active" data-mode="fingerspelling" title="Isolated Alphabets and Numbers (1-9, A-Z)">
+                        🔤 Fingerspelling Mode
+                    </button>
+                    <button id="modeWordBtn" class="mode-btn" data-mode="word" title="Multi-Hand Temporal Word Signs (30-frame TCN)">
+                        🖐️ Word / Sign Mode
+                    </button>
+                    <button id="modeContinuousBtn" class="mode-btn" data-mode="continuous" title="Continuous Signing & Boundary Segmentation">
+                        ⚡ Continuous ISL
+                    </button>
+                </div>
+            </div>
+            <div class="mode-right">
+                <button id="openCollectorBtn" class="btn btn-secondary btn-sm" title="Collect & Annotate Local ISL Video Clips">
+                    🎥 Dataset Collector Tool
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Dashboard Grid -->
+        <main class="dashboard-grid">
+            <!-- Left Column: Vision & Detection -->
+            <section class="viewport-section card">
+                <div class="card-header">
+                    <div class="card-title-group">
+                        <span class="card-icon">📹</span>
+                        <h2 class="card-title">Live Vision Stream & Hand Tracking</h2>
+                    </div>
+                    <div class="stream-controls">
+                        <label class="toggle-switch" title="Toggle AI Annotated Landmark Overlay">
+                            <input type="checkbox" id="overlayToggle" checked>
+                            <span class="slider"></span>
+                            <span class="toggle-label">AI Overlay</span>
+                        </label>
+                        <button id="camToggleBtn" class="btn btn-primary btn-sm">Start Camera</button>
+                    </div>
+                </div>
+
+                <div class="video-container" id="videoContainer">
+                    <video id="webcam" autoplay playsinline muted></video>
+                    <canvas id="streamCanvas" class="hidden-canvas"></canvas>
+                    <img id="annotatedOverlay" alt="Annotated Landmark Stream">
+                    <div id="camPlaceholder" class="camera-placeholder">
+                        <div class="placeholder-icon">📷</div>
+                        <h3>Camera Offline</h3>
+                        <p>Click <strong>"Start Camera"</strong> to begin real-time sign recognition</p>
+                    </div>
+                    <div class="stream-status-overlay">
+                        <span id="wsStatusBadge" class="status-badge disconnected">Disconnected</span>
+                        <span id="fpsTelemetry" class="status-telemetry">0.0 FPS</span>
+                    </div>
+                </div>
+
+                <!-- Real-time Recognition Badge & Confidence -->
+                <div class="detection-bar">
+                    <div class="sign-glyph-container">
+                        <span class="glyph-label" id="glyphLabel">Current Sign</span>
+                        <div id="signGlyph" class="sign-glyph">-</div>
+                    </div>
+                    <div class="confidence-container">
+                        <div class="confidence-header">
+                            <span>Confidence</span>
+                            <span id="confidenceVal" class="confidence-val">0.0%</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div id="confidenceBar" class="progress-bar-fill" style="width: 0%;"></div>
+                        </div>
+                        <div class="stabilizer-indicator">
+                            <span>Stabilized: <strong id="stableSignTxt">-</strong></span>
+                            <span>State: <strong id="stateTxt" class="highlight-state">NO_SIGN</strong></span>
+                        </div>
+                    </div>
+                    <!-- Top 3 Class Candidates -->
+                    <div class="top3-container">
+                        <span class="top3-label">Top Candidates</span>
+                        <div id="top3List" class="top3-list">
+                            <div class="top3-item"><span>-</span><span>0%</span></div>
+                            <div class="top3-item"><span>-</span><span>0%</span></div>
+                            <div class="top3-item"><span>-</span><span>0%</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Motion & Segmentation Telemetry (Word / Continuous Mode) -->
+                <div id="motionTelemetryBar" class="motion-telemetry-bar" style="display: none; padding: 0.5rem 1rem; background: #f8fafc; border-top: 1px solid var(--border-color); font-size: 0.78rem; display: flex; justify-content: space-between; color: var(--text-secondary);">
+                    <span>Temporal Buffer: <strong id="bufferFillTxt">0/30</strong> frames</span>
+                    <span>Motion Energy: <strong id="motionEnergyTxt">0.00</strong></span>
+                    <span>Sign Timing: <strong id="signTimingTxt">0.0 ms</strong></span>
+                </div>
+            </section>
+
+            <!-- Right Column: Text Accumulator, Multilingual Translation & Controls -->
+            <section class="controls-section">
+                <!-- Text Buffer Card (Fingerspelling Mode) -->
+                <div class="card buffer-card" id="fingerspellingCard">
+                    <div class="card-header">
+                        <div class="card-title-group">
+                            <span class="card-icon">✍️</span>
+                            <h2 class="card-title">Live Text Accumulator (Fingerspelling)</h2>
+                        </div>
+                        <div class="buffer-actions">
+                            <button id="spaceBtn" class="btn btn-secondary btn-sm" title="Add Space (Word Boundary)">␣ Space</button>
+                            <button id="backspaceBtn" class="btn btn-secondary btn-sm" title="Remove Last Sign">⌫ Backspace</button>
+                            <button id="clearBtn" class="btn btn-danger btn-sm" title="Clear Buffer">🗑️ Clear</button>
+                        </div>
+                    </div>
+                    <div class="buffer-display">
+                        <div class="buffer-label">English Assembled Sentence (ISL Character Stream):</div>
+                        <div id="fullTextDisplay" class="text-output-box placeholder">Recognized characters will appear here...</div>
+                        <div class="current-word-tag">Current Token: <span id="currentToken">-</span></div>
+                    </div>
+                </div>
+
+                <!-- Word & Continuous Gloss Sequence Card -->
+                <div class="card buffer-card" id="wordGlossCard" style="display: none;">
+                    <div class="card-header">
+                        <div class="card-title-group">
+                            <span class="card-icon">🖐️</span>
+                            <h2 class="card-title">ISL Gloss Sequence & Linguistic Interpretation</h2>
+                        </div>
+                        <div class="buffer-actions">
+                            <button id="undoGlossBtn" class="btn btn-secondary btn-sm" title="Undo Last Gloss">↩️ Undo</button>
+                            <button id="clearGlossBtn" class="btn btn-danger btn-sm" title="Clear Gloss Sequence">🗑️ Clear</button>
+                        </div>
+                    </div>
+                    <div class="buffer-display">
+                        <div class="buffer-label">Recognized Gloss Stream (Temporal Order):</div>
+                        <div id="glossTimeline" class="gloss-timeline-container">
+                            <span class="placeholder" style="color: var(--text-muted); font-size: 0.85rem;">Perform an ISL sign to see recognized glosses...</span>
+                        </div>
+                        
+                        <!-- ISL Grammar Context Layer -->
+                        <div id="grammarBox" class="grammar-box">
+                            <div class="grammar-header">
+                                <span>ISL Linguistic Interpretation:</span>
+                                <span id="canonicalBadge" class="badge badge-purple" style="font-size: 0.7rem;">Topic-Comment</span>
+                            </div>
+                            <div id="interpretedEnglish" style="font-weight: 700; color: #1e3a8a; font-size: 0.95rem; margin-bottom: 0.2rem;">-</div>
+                            <div id="grammarNotes" class="grammar-notes">Signs will be parsed according to ISL grammar rules.</div>
+                        </div>
+
+                        <!-- Uncertainty Warning -->
+                        <div id="uncertaintyWarning" class="uncertainty-alert">
+                            ⚠️ Low confidence / Ambiguous sequence. User verification recommended.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gemini Translation Card -->
+                <div class="card translation-card">
+                    <div class="card-header">
+                        <div class="card-title-group">
+                            <span class="card-icon">🌐</span>
+                            <h2 class="card-title">AI Translation — Gemini 3.5 Flash Lite</h2>
+                        </div>
+                        <div class="lang-selector-group">
+                            <label for="targetLangSelect" class="lang-label">Target:</label>
+                            <select id="targetLangSelect" class="select-input">
+                                <option value="te" selected>Telugu (తెలుగు)</option>
+                                <option value="hi">Hindi (हिन्दी)</option>
+                                <option value="ta">Tamil (தமிழ்)</option>
+                                <option value="kn">Kannada (ಕನ್ನಡ)</option>
+                                <option value="ml">Malayalam (മലയാളം)</option>
+                                <option value="bn">Bengali (বাংলা)</option>
+                                <option value="mr">Marathi (मराठी)</option>
+                                <option value="gu">Gujarati (ગુજરાતી)</option>
+                                <option value="en">English</option>
+                            </select>
+                            <button id="translateBtn" class="btn btn-primary btn-sm" title="Translate Output">Translate</button>
+                        </div>
+                    </div>
+                    <div class="translation-display">
+                        <div class="translation-header-row">
+                            <div class="buffer-label">Translated Output:</div>
+                            <span id="transStatusBadge" class="trans-status ready">● Ready</span>
+                        </div>
+                        <div id="translatedDisplay" class="text-output-box translation-box placeholder">Translation output will appear here...</div>
+                        <div class="translation-meta-row">
+                            <span id="cacheInfoTxt" class="cache-info">Cached: 0 | Calls Today: 0 / 500</span>
+                            <span id="transLatencyTxt" class="trans-latency">0.0 ms</span>
+                        </div>
+                    </div>
+                    <div class="translation-actions">
+                        <button id="speakBtn" class="btn btn-accent btn-md">
+                            <span class="btn-icon">🔊</span> Synthesize Speech (Local Offline TTS)
+                        </button>
+                        <button id="replayBtn" class="btn btn-secondary btn-md" style="margin-left: 0.5rem;" title="Replay Last Audio">
+                            <span class="btn-icon">🔁</span> Replay
+                        </button>
+                        <audio id="ttsAudio" class="hidden-audio"></audio>
+                    </div>
+                </div>
+
+                <!-- System Telemetry & Separated Latencies -->
+                <div class="card telemetry-card">
+                    <div class="card-header">
+                        <div class="card-title-group">
+                            <span class="card-icon">⚡</span>
+                            <h2 class="card-title">Telemetry & Latency Breakdown</h2>
+                        </div>
+                    </div>
+                    <div class="telemetry-grid">
+                        <div class="telemetry-item">
+                            <span class="telemetry-label">Model Inference</span>
+                            <span id="modelLatencyVal" class="telemetry-value highlight-green">0.10 ms</span>
+                        </div>
+                        <div class="telemetry-item">
+                            <span class="telemetry-label">MediaPipe Tracking</span>
+                            <span id="mpLatencyVal" class="telemetry-value">32.4 ms</span>
+                        </div>
+                        <div class="telemetry-item">
+                            <span class="telemetry-label">End-to-End Latency</span>
+                            <span id="e2eLatencyVal" class="telemetry-value">33.5 ms</span>
+                        </div>
+                        <div class="telemetry-item">
+                            <span class="telemetry-label">Pipeline FPS</span>
+                            <span id="pipelineFpsVal" class="telemetry-value">28.0 FPS</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Dataset Collector Modal -->
+        <div id="collectorModal" class="modal-backdrop">
+            <div class="modal-container">
+                <div class="modal-header">
+                    <h3 class="modal-title">🎥 ISL Word-Level Dataset Collector</h3>
+                    <button id="closeModalBtn" class="modal-close-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p style="font-size: 0.85rem; color: var(--text-secondary);">
+                        Record 30-frame multi-hand sign clips to expand the ISL word dataset.
+                        Splits are partitioned strictly by Signer ID to eliminate cross-signer leakage.
+                    </p>
+                    <div class="modal-row">
+                        <div class="modal-field">
+                            <label class="modal-label" for="recordGlossSelect">Select ISL Gloss:</label>
+                            <select id="recordGlossSelect" class="modal-input">
+                                <option value="HELLO">HELLO</option>
+                                <option value="THANK_YOU">THANK_YOU</option>
+                                <option value="HELP">HELP</option>
+                                <option value="YES">YES</option>
+                                <option value="NO">NO</option>
+                                <option value="PLEASE">PLEASE</option>
+                                <option value="GOOD">GOOD</option>
+                                <option value="WATER">WATER</option>
+                                <option value="FOOD">FOOD</option>
+                                <option value="YOU">YOU</option>
+                                <option value="ME">ME</option>
+                                <option value="NAME">NAME</option>
+                            </select>
+                        </div>
+                        <div class="modal-field">
+                            <label class="modal-label" for="signerIdInput">Signer ID (Pseudonymous):</label>
+                            <input id="signerIdInput" type="text" class="modal-input" value="signer_01" placeholder="e.g. signer_01">
+                        </div>
+                    </div>
+                    <div class="modal-row">
+                        <div class="modal-field">
+                            <label class="modal-label" for="lightingSelect">Lighting:</label>
+                            <select id="lightingSelect" class="modal-input">
+                                <option value="normal" selected>Normal</option>
+                                <option value="bright">Bright</option>
+                                <option value="dim">Dim</option>
+                            </select>
+                        </div>
+                        <div class="modal-field">
+                            <label class="modal-label" for="handednessSelect">Handedness:</label>
+                            <select id="handednessSelect" class="modal-input">
+                                <option value="one-handed" selected>One-handed</option>
+                                <option value="two-handed">Two-handed</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="margin-top: 0.5rem;">
+                        <span id="recordStatusTxt" style="font-weight: 600; font-size: 0.85rem; color: var(--text-secondary);">Ready to record 30-frame sample.</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="cancelRecordBtn" class="btn btn-secondary btn-sm">Close</button>
+                    <button id="startRecordBtn" class="btn btn-primary btn-sm">🔴 Record 30 Frames</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>Indian Sign Language Translation & Gloss Recognition Platform • Multimodal AI with Temporal Sequence Recognition (Phase 2 Upgrade)</p>
+        </footer>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

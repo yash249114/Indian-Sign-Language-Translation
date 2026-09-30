@@ -1,0 +1,296 @@
+{
+    "class_names": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "I",
+        "J",
+        "K",
+        "L",
+        "M",
+        "N",
+        "O",
+        "P",
+        "Q",
+        "R",
+        "S",
+        "T",
+        "U",
+        "V",
+        "W",
+        "X",
+        "Y",
+        "Z"
+    ],
+    "label_to_idx": {
+        "1": 0,
+        "2": 1,
+        "3": 2,
+        "4": 3,
+        "5": 4,
+        "6": 5,
+        "7": 6,
+        "8": 7,
+        "9": 8,
+        "A": 9,
+        "B": 10,
+        "C": 11,
+        "D": 12,
+        "E": 13,
+        "F": 14,
+        "G": 15,
+        "H": 16,
+        "I": 17,
+        "J": 18,
+        "K": 19,
+        "L": 20,
+        "M": 21,
+        "N": 22,
+        "O": 23,
+        "P": 24,
+        "Q": 25,
+        "R": 26,
+        "S": 27,
+        "T": 28,
+        "U": 29,
+        "V": 30,
+        "W": 31,
+        "X": 32,
+        "Y": 33,
+        "Z": 34
+    },
+    "idx_to_label": {
+        "0": "1",
+        "1": "2",
+        "2": "3",
+        "3": "4",
+        "4": "5",
+        "5": "6",
+        "6": "7",
+        "7": "8",
+        "8": "9",
+        "9": "A",
+        "10": "B",
+        "11": "C",
+        "12": "D",
+        "13": "E",
+        "14": "F",
+        "15": "G",
+        "16": "H",
+        "17": "I",
+        "18": "J",
+        "19": "K",
+        "20": "L",
+        "21": "M",
+        "22": "N",
+        "23": "O",
+        "24": "P",
+        "25": "Q",
+        "26": "R",
+        "27": "S",
+        "28": "T",
+        "29": "U",
+        "30": "V",
+        "31": "W",
+        "32": "X",
+        "33": "Y",
+        "34": "Z"
+    },
+    "num_classes": 35,
+    "feature_dim": 63,
+    "total_extracted_samples": 4136,
+    "train_samples": 2894,
+    "val_samples": 621,
+    "test_samples": 621,
+    "detection_stats": {
+        "1": {
+            "processed": 120,
+            "detected": 120,
+            "detection_rate_pct": 100.0
+        },
+        "2": {
+            "processed": 120,
+            "detected": 120,
+            "detection_rate_pct": 100.0
+        },
+        "3": {
+            "processed": 120,
+            "detected": 120,
+            "detection_rate_pct": 100.0
+        },
+        "4": {
+            "processed": 120,
+            "detected": 120,
+            "detection_rate_pct": 100.0
+        },
+        "5": {
+            "processed": 120,
+            "detected": 120,
+            "detection_rate_pct": 100.0
+        },
+        "6": {
+            "processed": 120,
+            "detected": 120,
+            "detection_rate_pct": 100.0
+        },
+        "7": {
+            "processed": 120,
+            "detected": 120,
+            "detection_rate_pct": 100.0
+        },
+        "8": {
+            "processed": 120,
+            "detected": 120,
+            "detection_rate_pct": 100.0
+        },
+        "9": {
+            "processed": 120,
+            "detected": 120,
+            "detection_rate_pct": 100.0
+        },
+        "A": {
+            "processed": 120,
+            "detected": 120,
+            "detection_rate_pct": 100.0
+        },
+        "B": {
+            "processed": 120,
+            "detected": 119,
+            "detection_rate_pct": 99.17
+        },
+        "C": {
+            "processed": 120,
+            "detected": 120,
+            "detection_rate_pct": 100.0
+        },
+        "D": {
+            "processed": 120,
+            "detected": 120,
+            "detection_rate_pct": 100.0
+        },
+        "E": {
+            "processed": 120,
+            "detected": 120,
+            "detection_rate_pct": 100.0
+        },
+        "F": {
+            "processed": 120,
+            "detected": 120,
+            "detection_rate_pct": 100.0
+        },
+        "G": {
+            "processed": 120,
+            "detected": 120,
+            "detection_rate_pct": 100.0
+        },
+        "H": {
+            "processed": 120,
+            "detected": 120,
+            "detection_rate_pct": 100.0
+        },
+        "I": {
+            "processed": 120,
+            "detected": 120,
+            "detection_rate_pct": 100.0
+        },
+        "J": {
+            "processed": 120,
+            "detected": 120,
+            "detection_rate_pct": 100.0
+        },
+        "K": {
+            "processed": 120,
+            "detected": 120,
+            "detection_rate_pct": 100.0
+        },
+        "L": {
+            "processed": 120,
+            "detected": 120,
+            "detection_rate_pct": 100.0
+        },
+        "M": {
+            "processed": 120,
+            "detected": 120,
+            "detection_rate_pct": 100.0
+        },
+        "N": {
+            "processed": 120,
+            "detected": 120,
+            "detection_rate_pct": 100.0
+        },
+        "O": {
+            "processed": 120,
+            "detected": 120,
+            "detection_rate_pct": 100.0
+        },
+        "P": {
+            "processed": 120,
+            "detected": 90,
+            "detection_rate_pct": 75.0
+        },
+        "Q": {
+            "processed": 120,
+            "detected": 92,
+            "detection_rate_pct": 76.67
+        },
+        "R": {
+            "processed": 120,
+            "detected": 120,
+            "detection_rate_pct": 100.0
+        },
+        "S": {
+            "processed": 120,
+            "detected": 115,
+            "detection_rate_pct": 95.83
+        },
+        "T": {
+            "processed": 120,
+            "detected": 120,
+            "detection_rate_pct": 100.0
+        },
+        "U": {
+            "processed": 120,
+            "detected": 120,
+            "detection_rate_pct": 100.0
+        },
+        "V": {
+            "processed": 120,
+            "detected": 120,
+            "detection_rate_pct": 100.0
+        },
+        "W": {
+            "processed": 120,
+            "detected": 120,
+            "detection_rate_pct": 100.0
+        },
+        "X": {
+            "processed": 120,
+            "detected": 120,
+            "detection_rate_pct": 100.0
+        },
+        "Y": {
+            "processed": 120,
+            "detected": 120,
+            "detection_rate_pct": 100.0
+        },
+        "Z": {
+            "processed": 120,
+            "detected": 120,
+            "detection_rate_pct": 100.0
+        }
+    }
+}
