@@ -6,28 +6,34 @@
 [![Project Portal](https://img.shields.io/badge/GitHub%20Pages-Project%20Portal-purple.svg)](https://yash249114.github.io/Indian-Sign-Language-Translation/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> Real-Time ISL Fingerspelling Recognition • Multimodal AI • Foundation for Temporal Word-Sign Understanding
+> **Baseline v1 — Real-Time ISL Fingerspelling Recognition**  
+> A-Z and 1-9 recognition using MediaPipe landmark extraction and a lightweight static classifier.  
+> *Next: temporal word-sign recognition and continuous ISL understanding.*
 
 ---
 
 ## 📌 Current Baseline
 
-**Baseline v1** delivers a verified, robust real-time Indian Sign Language fingerspelling system recognizing:
-- **Alphabet**: `A` through `Z`
-- **Digits**: `1` through `9`
+**Baseline v1** delivers a verified, robust real-time Indian Sign Language fingerspelling system:
+- **Alphabet**: `A` through `Z` fingerspelling recognition
+- **Digits**: `1` through `9` fingerspelling recognition
+
+The current baseline recognizes isolated fingerspelling characters and digits in real time. These recognized characters can be accumulated into text. Word-level temporal sign recognition is part of the next development stage.
 
 Powered by:
-- **MediaPipe Hands** for sub-15ms 3D landmark extraction.
-- **Geometric Normalization**: 63-dimensional translation-invariant and scale-invariant feature extraction.
-- **Deep MLP Classifier**: 3-layer neural network achieving **99.36%** accuracy on held-out test data.
+- **MediaPipe Hands**: Local 21 3D single-hand landmark extraction with sub-15ms processing.
+- **63D Geometric Normalization**: Translation-invariant (wrist origin $(0, 0, 0)$) and scale-invariant feature extraction.
+- **Static MLP Classifier**: 3-layer neural network achieving **99.36%** accuracy on held-out test data with sub-2ms inference latency.
 - **Prediction Stabilization & Debouncing**: Commit-once finite state machine that guarantees a held hand produces exactly one character instead of repeated characters.
-- **Text Accumulation**: Word and phrase builder with Space, Backspace, and Clear operations.
-- **Translation Layer**: Asynchronous translation into Telugu, Hindi, Tamil, Kannada, and Marathi powered by **Gemini 3.5 Flash Lite** (with offline lexicon fallback).
+- **Text Buffering**: Word and phrase builder with Space, Backspace, and Clear operations.
+- **Multilingual Translation**: Asynchronous translation into Telugu, Hindi, Tamil, Kannada, and Marathi powered by **Gemini 3.5 Flash Lite** (with offline lexicon fallback).
 - **Speech Synthesis**: Local offline **pyttsx3** TTS engine for instant spoken pronunciation.
 
 > [!IMPORTANT]
-> **Word-level temporal recognition is not included in Baseline v1.**  
-> Baseline v1 provides static fingerspelling character recognition. Temporal sequence modeling for dynamic word signs is currently in active development for Phase 2.
+> **Scope Boundaries:**
+> - **Current production inference model:** Static MLP classifier.
+> - **Temporal word-sign recognition is a planned future phase and is not included in Baseline v1.**
+> - **Continuous ISL signing is planned future work and is not part of Baseline v1.**
 
 ---
 
@@ -63,21 +69,28 @@ Gemini 3.5 Flash Lite Translation        Offline Rule-Based Lexicon             
 
 - [x] **Real-Time Video Ingestion**: Native WebSocket streaming and HTTP image processing at 30 FPS.
 - [x] **MediaPipe Keypoint Extraction**: 21 3D coordinates per hand with zero cloud dependencies.
-- [x] **Mathematically Invariant Normalization**: Guarantees consistent coordinate representations across camera distance and user position.
-- [x] **High-Precision Classification**: Scikit-Learn MLP with 99.36% test accuracy and $<1.5\text{ms}$ inference latency.
+- [x] **Mathematically Invariant Normalization**: Guarantees consistent 63D coordinate representations across camera distance and user position.
+- [x] **High-Precision Classification**: Scikit-Learn MLP with 99.36% test accuracy and sub-2ms inference latency.
 - [x] **State Machine Debouncing**: Eliminates character repetition (`NNNVVV...`) during held postures.
 - [x] **Multilingual Translation**: Seamless translation to 5 Indian languages via Gemini 3.5 Flash Lite or offline dictionary.
 - [x] **Local Text-to-Speech**: Speech synthesis without cloud costs or latency.
-- [x] **Zero-Leakage Signer Dataset Tooling**: Built-in scripts for recording and validating future temporal datasets.
+- [x] **Dataset Collection Tooling**: Dataset collection tooling is being prepared for the upcoming word-sign recognition phase. No real human word-sign training clips are included in Baseline v1.
 
 ---
 
-## 📋 System Requirements
+## 📋 Technology Stack
 
-- **Operating System**: Windows 10/11, Ubuntu 20.04+, or macOS
-- **Python**: Version 3.10.x recommended (3.9 to 3.11 supported)
-- **Web Browser**: Google Chrome, Microsoft Edge, or Mozilla Firefox with camera access
-- **Hardware**: Standard 720p/1080p webcam; CPU-only execution is fully supported (no GPU required for inference)
+### Active Production Runtime
+- **Language**: Python 3.10
+- **Server**: FastAPI 0.115.6, Uvicorn 0.34.0, WebSockets 14.1
+- **Computer Vision & ML**: MediaPipe 0.10.14, Scikit-Learn 1.5.0 (MLP Classifier), OpenCV 4.8.1, NumPy 1.26.4
+- **Translation & Speech**: Gemini 3.5 Flash Lite (REST), pyttsx3 2.90 (Offline TTS)
+- **Validation**: Pytest 8.2.2 (49 Passing Tests)
+- **Frontend**: Vanilla HTML5, CSS3, ES6 JavaScript (Zero external framework build requirements)
+
+### Future Research Stack (Planned for Phase 2 & Beyond)
+- **Deep Learning**: PyTorch 2.9.1 (Planned for temporal Bi-GRU / TCN word recognition)
+- **Sequence Modeling**: Connectionist Temporal Classification (CTC) for continuous signing
 
 ---
 
@@ -159,9 +172,9 @@ python -m pytest tests/test_acceptance.py -v
 
 ## ⚠️ Current Limitations
 
-1. **Isolated Character Postures Only**: Baseline v1 classifies one static gesture at a time.
-2. **No Real Human Temporal Word Dataset**: Dynamic signs (e.g. `WATER`, `HELLO`, `FOOD`) require 30-frame temporal sequences from human signers, which have not yet been recorded.
-3. **No Continuous Sentence Signing**: Continuous unconstrained signing without neutral pauses is not supported in this baseline.
+1. **Isolated Fingerspelling Postures Only**: Baseline v1 classifies one static gesture at a time.
+2. **No Real Human Temporal Word Dataset**: Dynamic signs (e.g. `WATER`, `HELLO`, `FOOD`) require 30-frame temporal sequences from human signers; no real human word-sign training clips are included in Baseline v1.
+3. **Continuous ISL Signing is Not Implemented**: The current system requires discrete pauses/neutral hand positions between signs; continuous sentence-level CTC decoding is planned future work for Phase 3.
 4. **Static 2D Training Origin**: The underlying alphabet dataset consists of static images and cannot be used to train temporal video models.
 
 ---

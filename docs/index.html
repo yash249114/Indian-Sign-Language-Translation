@@ -34,9 +34,9 @@
   <!-- Hero Section -->
   <header class="hero">
     <div class="container">
-      <span class="hero-tag">Academic Research & Engineering Baseline</span>
+      <span class="hero-tag">Baseline v1 — Real-Time ISL Fingerspelling Recognition</span>
       <h1>Indian Sign Language Translation, Gloss Recognition & Query-Based Video Search Platform</h1>
-      <p class="subtitle">Real-Time ISL Recognition • Multimodal AI • Temporal Sign Understanding</p>
+      <p class="subtitle">A-Z and 1-9 recognition using MediaPipe landmark extraction and a lightweight static classifier.<br><span style="font-size: 0.95rem; color: #64748b;">Next: temporal word-sign recognition and continuous ISL understanding.</span></p>
 
       <div class="hero-actions">
         <a href="https://github.com/yash249114/Indian-Sign-Language-Translation" target="_blank" class="btn btn-primary" id="btn-github">
@@ -71,7 +71,12 @@
         <div class="card">
           <h3 class="card-title">Engineering Mission</h3>
           <div class="card-body">
-            This platform bridges communication barriers for the deaf and hard-of-hearing community in India. By tracking hand kinematics via standard webcams, normalising 3D anatomical landmarks, and classifying gestures with high precision, the system constructs words and phrases, translates them into regional Indian languages, and synthesizes local speech.
+            <p style="margin-bottom: 12px;">
+              The current baseline recognizes isolated fingerspelling characters and digits in real time. These recognized characters can be accumulated into text. Word-level temporal sign recognition is part of the next development stage.
+            </p>
+            <p>
+              Alphabet fingerspelling is a fundamental accessibility layer for names, numbers, and technical terms, but is distinct from native ISL lexical word signs and continuous signing.
+            </p>
           </div>
         </div>
 
@@ -79,7 +84,7 @@
           <h3 class="card-title">Production Design Principles</h3>
           <div class="card-body">
             <ul>
-              <li><strong>Zero Cloud Inference for Vision</strong>: MediaPipe and neural classification run 100% on the local CPU.</li>
+              <li><strong>Zero Cloud Inference for Vision</strong>: MediaPipe and static neural classification run 100% on the local CPU.</li>
               <li><strong>State-Machine Stabilization</strong>: Guaranteed single-character emission during held gestures.</li>
               <li><strong>Resilient Language Layer</strong>: Gemini 3.5 Flash Lite translation with automatic offline lexicon fallback.</li>
             </ul>
@@ -103,7 +108,10 @@
             <strong>Current baseline: fingerspelling recognition A-Z and 1-9.</strong>
           </p>
           <p style="margin-bottom: 16px;">
-            The active model is a deep Multi-Layer Perceptron (MLP) trained on 63-dimensional normalized single-hand coordinates. It recognizes 35 static sign classes with <strong>99.36% test accuracy</strong> and sub-2ms CPU inference latency.
+            The active production model is a deep Multi-Layer Perceptron (MLP) trained on 63-dimensional normalized single-hand coordinates. It recognizes 35 static sign classes with <strong>99.36% test accuracy</strong> and sub-2ms CPU inference latency.
+          </p>
+          <p style="margin-bottom: 16px;">
+            <strong>Current production inference model:</strong> Static MLP classifier. Temporal word-sign recognition is a planned future phase. Continuous ISL signing is planned future work and is not part of Baseline v1.
           </p>
           <div class="banner-notice" style="margin: 0; background: #eff6ff; border-color: #bfdbfe; color: #1e40af; border-left-color: #2563eb;">
             <strong>Scope Boundary:</strong> Word-level temporal sign recognition and continuous signing are future development stages and are not included in Baseline v1.
@@ -135,7 +143,7 @@
             <div class="step-num">2</div>
             <div class="step-info">
               <h4>MediaPipe Hands</h4>
-              <p>Locates 21 3D hand landmarks $(x, y, z)$ with on-device sub-15ms processing.</p>
+              <p>Locates 21 3D single-hand landmarks $(x, y, z)$ with on-device sub-15ms processing.</p>
             </div>
           </div>
 
@@ -143,7 +151,7 @@
             <div class="step-num">3</div>
             <div class="step-info">
               <h4>63D Geometric Normalization</h4>
-              <p>Centers coordinates at the wrist origin $(0, 0, 0)$ and scales by max Euclidean distance for scale/translation invariance.</p>
+              <p>Centers coordinates at the wrist origin $(0, 0, 0)$ and scales by max Euclidean distance for scale and translation invariance.</p>
             </div>
           </div>
 
@@ -167,7 +175,7 @@
             <div class="step-num">6</div>
             <div class="step-info">
               <h4>Text Buffer Accumulator</h4>
-              <p>Manages live text composition with append, space, backspace, and clear operations.</p>
+              <p>Manages live character accumulation with append, space, backspace, and clear operations.</p>
             </div>
           </div>
 
@@ -219,7 +227,7 @@
 
         <div class="card">
           <h4 class="card-title">Dataset Collection Tooling</h4>
-          <p class="card-body">Built-in multi-signer video and landmark capture pipeline with zero-leakage manifest validation.</p>
+          <p class="card-body">Dataset collection tooling is being prepared for the upcoming word-sign recognition phase. No real human word-sign training clips are included in Baseline v1.</p>
         </div>
       </div>
     </div>
@@ -256,22 +264,32 @@
     <div class="container">
       <div class="section-header">
         <h2>6. Technology Stack</h2>
-        <p>Core frameworks, libraries, and runtime dependencies.</p>
+        <p>Production runtime dependencies and planned research tools.</p>
       </div>
 
+      <div style="margin-bottom: 12px; font-weight: 600; font-size: 0.95rem; color: var(--text-main);">
+        Active Production Runtime:
+      </div>
       <div class="tech-badges">
         <span class="badge">Python 3.10</span>
         <span class="badge">FastAPI 0.115.6</span>
         <span class="badge">Uvicorn 0.34.0</span>
         <span class="badge">MediaPipe 0.10.14</span>
-        <span class="badge">Scikit-Learn 1.5.0</span>
-        <span class="badge">PyTorch 2.9.1</span>
+        <span class="badge">Scikit-Learn 1.5.0 (MLP Classifier)</span>
         <span class="badge">OpenCV 4.8.1</span>
         <span class="badge">NumPy 1.26.4</span>
         <span class="badge">Gemini 3.5 Flash Lite</span>
         <span class="badge">pyttsx3 Offline TTS</span>
-        <span class="badge">Pytest 8.2.2</span>
+        <span class="badge">Pytest 8.2.2 (49 Passing Tests)</span>
         <span class="badge">Vanilla HTML5/CSS3/ES6</span>
+      </div>
+
+      <div style="margin-top: 20px; margin-bottom: 12px; font-weight: 600; font-size: 0.95rem; color: var(--text-muted);">
+        Future Research Stack (Phase 2 & Beyond):
+      </div>
+      <div class="tech-badges">
+        <span class="badge" style="border-style: dashed;">PyTorch 2.9.1 (Planned Bi-GRU / TCN)</span>
+        <span class="badge" style="border-style: dashed;">CTC Sequence Modeling (Planned Phase 3)</span>
       </div>
     </div>
   </section>
@@ -365,7 +383,7 @@ pip install -r requirements.txt</pre>
           <tr>
             <td><strong>Temporal Word Signs</strong></td>
             <td><span class="status-tag status-future">FUTURE</span></td>
-            <td>No real human multi-signer video dataset collected yet. Structural model implemented.</td>
+            <td>Dataset collection tooling is in preparation; no real human multi-signer training clips are included in Baseline v1.</td>
           </tr>
           <tr>
             <td><strong>Continuous Sentence Signing</strong></td>
