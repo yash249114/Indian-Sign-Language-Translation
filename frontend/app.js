@@ -80,6 +80,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const lightingSelect = document.getElementById("lightingSelect");
     const handednessSelect = document.getElementById("handednessSelect");
     const recordStatusTxt = document.getElementById("recordStatusTxt");
+    const consentCheckbox = document.getElementById("consentCheckbox");
+    const videoConsentCheckbox = document.getElementById("videoConsentCheckbox");
 
     // State Variables
     let currentMode = "fingerspelling"; // "fingerspelling", "word", or "continuous"
@@ -92,8 +94,18 @@ document.addEventListener("DOMContentLoaded", () => {
     let lastAudioUrl = null;
 
     // Dataset Recording State
+    const CLIP_FRAMES = 30;
+    const FEATURE_DIM = 126;
+    const MIN_HAND_FRAMES = 20;
+    const CLIP_TIMEOUT_MS = 10000;
     let isCollectingClip = false;
     let collectedLandmarkFrames = [];
+    let collectedTimestamps = [];
+    let collectedHandFrames = 0;
+    let clipMeta = null;
+    let clipRecorder = null;
+    let clipChunks = [];
+    let clipTimeout = null;
 
     // =========================================================================
     // Mode Switching Logic
@@ -254,6 +266,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // UI Update Handlers
     // =========================================================================
     function handleServerMessage(data) {
+        if (isCollectingClip && Array.isArray(data.collect_features)) onCollectFrame(data);
         if (data.type === "word_frame_result") {
             // Word & Continuous Temporal Result
             if (data.detected && (data.committed_gloss || data.state !== "IDLE")) {
@@ -495,6 +508,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 image: imageBase64,
                 mode: currentMode,
                 include_annotated: overlayToggle.checked,
+                collect_features: isCollectingClip,
                 target_lang: targetLangSelect.value
             }));
         }, 1000 / FRAME_RATE);
@@ -608,45 +622,152 @@ document.addEventListener("DOMContentLoaded", () => {
         collectorModal.style.display = "none";
     });
 
+    function setRecordStatus(text, color) {
+        recordStatusTxt.textContent = text;
+        recordStatusTxt.style.color = color;
+    }
+
+    function abortClip(msg) {
+        isCollectingClip = false;
+        clearTimeout(clipTimeout);
+        if (clipRecorder && clipRecorder.state !== "inactive") clipRecorder.stop();
+        clipRecorder = null;
+        setRecordStatus(msg, "#dc2626");
+        startRecordBtn.disabled = false;
+    }
+
+    function onCollectFrame(data) {
+        if (data.collect_features.length !== FEATURE_DIM) return abortClip(`Server sent ${data.collect_features.length}D features, expected ${FEATURE_DIM}. Not saved.`);
+        collectedLandmarkFrames.push(data.collect_features);
+        collectedTimestamps.push(performance.now());
+        if (data.collect_detected) collectedHandFrames++;
+        const n = collectedLandmarkFrames.length;
+        setRecordStatus(`Recording ${clipMeta.gloss}: ${n}/${CLIP_FRAMES} frames (hands in ${collectedHandFrames})`, "#dc2626");
+        if (n >= CLIP_FRAMES) {
+            isCollectingClip = false;
+            clearTimeout(clipTimeout);
+            finishClip();
+        }
+    }
+
+    function stopRecorder() {
+        return new Promise(resolve => {
+            if (!clipRecorder || clipRecorder.state === "inactive") return resolve(null);
+            clipRecorder.onstop = () => resolve(new Blob(clipChunks, { type: "video/webm" }));
+            clipRecorder.stop();
+        });
+    }
+
+    function blobToBase64(blob) {
+        return new Promise((resolve, reject) => {
+            const r = new FileReader();
+            r.onload = () => resolve(r.result.split(",")[1]);
+            r.onerror = () => reject(r.error);
+            r.readAsDataURL(blob);
+        });
+    }
+
+    async function finishClip() {
+        const frames = collectedLandmarkFrames.slice(0, CLIP_FRAMES);
+        const t0 = collectedTimestamps[0];
+        const ts = collectedTimestamps.slice(0, CLIP_FRAMES).map(t => Math.round((t - t0) * 100) / 100);
+        const span = ts[ts.length - 1] / 1000;
+        const fps = span > 0 ? (CLIP_FRAMES - 1) / span : FRAME_RATE;
+        const blob = await stopRecorder();
+        clipRecorder = null;
+
+        if (frames.length !== CLIP_FRAMES || frames.some(f => f.length !== FEATURE_DIM)) {
+            return abortClip(`Captured ${frames.length} frames with wrong shape. Not saved.`);
+        }
+        if (collectedHandFrames < MIN_HAND_FRAMES) {
+            return abortClip(`Hands visible in only ${collectedHandFrames}/${CLIP_FRAMES} frames (need ${MIN_HAND_FRAMES}). Not saved, please re-record.`);
+        }
+
+        setRecordStatus("Uploading and verifying sample...", "#d97706");
+        try {
+            const body = {
+                ...clipMeta,
+                landmarks_features: frames,
+                frame_timestamps_ms: ts,
+                fps: Math.round(fps * 100) / 100,
+                notes: "Captured via in-browser dataset collection tool"
+            };
+            if (blob && blob.size > 0 && clipMeta.video_consent) body.video_base64 = await blobToBase64(blob);
+            const resp = await fetch("/api/dataset/record-clip", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body)
+            });
+            let data = null;
+            try { data = await resp.json(); } catch (_) { /* non-JSON error body */ }
+            if (!resp.ok) {
+                const detail = typeof data?.detail === "string" ? data.detail : JSON.stringify(data?.detail ?? resp.statusText);
+                throw new Error(`server rejected sample (${resp.status}): ${detail}`);
+            }
+            if (data?.status !== "saved" || data?.verified !== true || !data?.clip?.landmarks_file) {
+                throw new Error("server did not confirm the files were saved");
+            }
+            const c = data.clip;
+            setRecordStatus(`Saved ${c.gloss} (${c.clip_id}), split ${c.split}, hands in ${c.hand_frames}/${CLIP_FRAMES} frames${c.clip_file ? ", video saved" : ""}. Dataset total: ${data.total_clips}.`, "#059669");
+        } catch (err) {
+            setRecordStatus(`NOT saved: ${err.message}`, "#dc2626");
+        } finally {
+            startRecordBtn.disabled = false;
+        }
+    }
+
     startRecordBtn.addEventListener("click", async () => {
-        if (!isStreaming) {
-            alert("Please start the webcam first before capturing signs!");
+        if (!isStreaming || !ws || ws.readyState !== WebSocket.OPEN) {
+            setRecordStatus("Start the camera and wait for the server connection first.", "#dc2626");
+            return;
+        }
+        if (!consentCheckbox.checked) {
+            setRecordStatus("Signer consent is required before recording.", "#dc2626");
+            return;
+        }
+        const signerId = signerIdInput.value.trim().toLowerCase();
+        if (!/^[a-z0-9_-]{1,32}$/.test(signerId)) {
+            setRecordStatus("Signer ID must be a pseudonym like signer_05 (a-z, 0-9, _ or -).", "#dc2626");
             return;
         }
 
-        const gloss = recordGlossSelect.value;
-        const signerId = signerIdInput.value.trim() || "signer_01";
-        const lighting = lightingSelect.value;
-        const handedness = handednessSelect.value;
-
+        clipMeta = {
+            gloss: recordGlossSelect.value,
+            signer_id: signerId,
+            lighting: lightingSelect.value,
+            handedness: handednessSelect.value,
+            consent: true,
+            video_consent: videoConsentCheckbox.checked
+        };
         startRecordBtn.disabled = true;
-        recordStatusTxt.textContent = `Recording 30 frames for ${gloss}... Perform the sign now!`;
-        recordStatusTxt.style.color = "#dc2626";
 
-        // Collect 30 consecutive feature frames from the stream
-        setTimeout(async () => {
+        for (let i = 3; i > 0; i--) {
+            setRecordStatus(`Get ready to sign ${clipMeta.gloss}... ${i}`, "#d97706");
+            await new Promise(r => setTimeout(r, 700));
+        }
+        if (!isStreaming) return abortClip("Camera stopped. Not saved.");
+
+        collectedLandmarkFrames = [];
+        collectedTimestamps = [];
+        collectedHandFrames = 0;
+        clipChunks = [];
+        clipRecorder = null;
+        if (clipMeta.video_consent && window.MediaRecorder && streamMedia) {
             try {
-                const resp = await fetch("/api/dataset/record-clip", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        gloss: gloss,
-                        signer_id: signerId,
-                        lighting: lighting,
-                        handedness: handedness,
-                        notes: "Captured via in-browser dataset collection tool"
-                    })
-                });
-                const data = await resp.json();
-                recordStatusTxt.textContent = `Successfully saved ${gloss} clip into manifest! (Assigned split: ${data.clip?.split})`;
-                recordStatusTxt.style.color = "#059669";
-            } catch (err) {
-                recordStatusTxt.textContent = `Error recording clip: ${err.message}`;
-                recordStatusTxt.style.color = "#dc2626";
-            } finally {
-                startRecordBtn.disabled = false;
+                const mime = MediaRecorder.isTypeSupported("video/webm;codecs=vp8") ? "video/webm;codecs=vp8" : "video/webm";
+                clipRecorder = new MediaRecorder(streamMedia, { mimeType: mime });
+                clipRecorder.ondataavailable = e => { if (e.data.size > 0) clipChunks.push(e.data); };
+                clipRecorder.start();
+            } catch (e) {
+                console.warn("[Collector] MediaRecorder unavailable", e);
+                clipRecorder = null;
             }
-        }, 1500);
+        }
+        isCollectingClip = true;
+        setRecordStatus(`Recording ${clipMeta.gloss}: 0/${CLIP_FRAMES} frames`, "#dc2626");
+        clipTimeout = setTimeout(() => {
+            if (isCollectingClip) abortClip(`Timed out with ${collectedLandmarkFrames.length}/${CLIP_FRAMES} frames (slow connection?). Not saved.`);
+        }, CLIP_TIMEOUT_MS);
     });
 
     // Keyboard Shortcuts
