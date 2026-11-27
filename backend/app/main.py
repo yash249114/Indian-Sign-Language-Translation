@@ -182,12 +182,13 @@ def health_check():
         "translation_model": translator.model_name,
         "models_loaded": {
             "fingerspelling_classifier": "Deep MLP (63D)",
-            "word_temporal_classifier": f"TemporalCNN (126D, {len(word_predictor.classes)} classes)",
+            "word_temporal_classifier": f"TemporalCNN (126D, {len(word_predictor.classes)} classes) - {word_predictor.model_status()['label']}",
             "hand_tracker": "MediaPipe Multi-Hand Tracker",
             "isl_grammar_engine": "ISLRTC Rule & Topic-Comment Parser",
             "translation": "gemini-3.5-flash-lite",
             "tts_engine": "pyttsx3 Local Offline"
-        }
+        },
+        "word_model_status": word_predictor.model_status()
     }
 
 
@@ -225,7 +226,12 @@ def get_dataset_and_model_stats():
         with open(temp_eval_path, "r", encoding="utf-8") as f:
             temp_eval = json.load(f)
     else:
-        temp_eval = {"test_accuracy": 1.0, "architecture": "tcn"}
+        temp_eval = {}
+    if not temp_eval.get("is_real_world_metric"):
+        temp_eval["benchmark_type"] = temp_eval.get("benchmark_type", "synthetic_reference")
+        temp_eval["is_real_world_metric"] = False
+        temp_eval["warning"] = "Synthetic reference benchmark only. Not real-world performance."
+    temp_eval["model_status"] = word_predictor.model_status()
 
     return {
         "dataset_summary": stats,

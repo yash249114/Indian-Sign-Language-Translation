@@ -110,6 +110,25 @@ document.addEventListener("DOMContentLoaded", () => {
     // =========================================================================
     // Mode Switching Logic
     // =========================================================================
+    const wordModelStatusBanner = document.getElementById("wordModelStatusBanner");
+    const wordModelStatusTxt = document.getElementById("wordModelStatusTxt");
+    let wordModelValidated = false;
+
+    async function fetchWordModelStatus() {
+        try {
+            const resp = await fetch("/api/health");
+            const st = (await resp.json()).word_model_status || {};
+            wordModelValidated = st.validated === true;
+            if (wordModelStatusTxt) wordModelStatusTxt.textContent = st.label || "Reference model, not validated";
+        } catch (e) {}
+        updateWordModelBanner();
+    }
+
+    function updateWordModelBanner() {
+        if (!wordModelStatusBanner) return;
+        wordModelStatusBanner.style.display = (currentMode !== "fingerspelling" && !wordModelValidated) ? "block" : "none";
+    }
+
     function setMode(newMode) {
         currentMode = newMode;
         [modeFingerspellingBtn, modeWordBtn, modeContinuousBtn].forEach(b => b.classList.remove("active"));
@@ -134,8 +153,11 @@ document.addEventListener("DOMContentLoaded", () => {
             glyphLabel.textContent = "Active Gloss Sign";
         }
 
+        updateWordModelBanner();
         sendAction("set_mode", { target_mode: newMode });
     }
+
+    fetchWordModelStatus();
 
     modeFingerspellingBtn.addEventListener("click", () => setMode("fingerspelling"));
     modeWordBtn.addEventListener("click", () => setMode("word"));
