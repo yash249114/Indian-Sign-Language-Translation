@@ -31,3 +31,22 @@ def test_tts_empty_text():
     tts = LocalOfflineTTSEngine()
     res = tts.speak("", language="en")
     assert res["success"] is False
+
+
+def test_tts_reports_unrenderable_text_instead_of_silent_file(monkeypatch):
+    """A header-only WAV (no voice for the script) must be reported as a failure, not returned."""
+    import sys, types
+    tts = LocalOfflineTTSEngine()
+
+    class FakeEngine:
+        def setProperty(self, *a): pass
+        def save_to_file(self, text, path):
+            with open(path, "wb") as f:
+                f.write(b"RIFF" + b"\0" * 42)  # 46-byte header-only WAV
+        def runAndWait(self): pass
+
+    monkeypatch.setitem(sys.modules, "pyttsx3", types.SimpleNamespace(init=lambda: FakeEngine()))
+    res = tts.speak("వీడ్కోలు", language="te")
+    assert res["success"] is False
+    assert res["audio_file"] is None
+    assert "voice" in res["error"]
