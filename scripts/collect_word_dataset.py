@@ -14,7 +14,7 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-from backend.app.collector import collector, load_vocabulary
+from backend.app.collector import collector, load_vocabulary, ClipValidationError
 from vision.hand_tracking.multi_hand_tracker import MultiHandTracker
 
 
@@ -37,6 +37,11 @@ def run_interactive_collector():
     if not signer_id:
         signer_id = "signer_01"
 
+    consent = input("Has this signer given informed consent to store their hand-landmark recordings for research? [y/N]: ").strip().lower()
+    if consent != "y":
+        print("[Abort] Consent is required. Nothing recorded.")
+        return
+
     cap = cv2.VideoCapture(0)
     if not cap.isOpened():
         print("[Error] Cannot open webcam index 0.")
@@ -52,6 +57,7 @@ def run_interactive_collector():
     recording = False
     recorded_frames = []
     recorded_features = []
+    recorded_times = []
 
     try:
         while True:
@@ -73,6 +79,7 @@ def run_interactive_collector():
             if recording:
                 recorded_frames.append(frame.copy())
                 recorded_features.append(track_res["feature_vector"])
+                recorded_times.append(time.perf_counter() * 1000.0)
                 cv2.circle(annotated, (w - 40, 40), 15, (0, 0, 255), -1)
                 cv2.putText(annotated, f"REC {len(recorded_frames)}/30", (w - 180, 45), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
@@ -80,18 +87,25 @@ def run_interactive_collector():
                     recording = False
                     print(f"Recorded 30 frames for {current_gloss}. Saving...")
                     feat_array = np.array(recorded_features, dtype=np.float32)
-                    collector.record_clip(
-                        gloss=current_gloss,
-                        signer_id=signer_id,
-                        clip_bytes=None,
-                        landmarks_data={"features": feat_array},
-                        handedness="two-handed" if "HELP" in current_gloss or "NAME" in current_gloss else "one-handed",
-                        frame_count=30,
-                        fps=30.0
-                    )
-                    print(f"Saved {current_gloss} clip metadata and landmark sequence.")
+                    ts = [t - recorded_times[0] for t in recorded_times]
+                    fps = 29000.0 / ts[-1] if ts[-1] > 0 else 30.0
+                    try:
+                        entry = collector.record_clip(
+                            gloss=current_gloss,
+                            signer_id=signer_id,
+                            features=feat_array,
+                            consent=True,
+                            handedness="two-handed" if "HELP" in current_gloss or "NAME" in current_gloss else "one-handed",
+                            fps=fps,
+                            frame_timestamps_ms=ts,
+                            source="cli_collector"
+                        )
+                        print(f"Saved {entry['clip_id']} -> {entry['landmarks_file']} (split {entry['split']}, hands in {entry['hand_frames']}/30)")
+                    except ClipValidationError as e:
+                        print(f"[Rejected] {e}. Not saved.")
                     recorded_frames.clear()
                     recorded_features.clear()
+                    recorded_times.clear()
 
             cv2.imshow("ISL Word Dataset Collector", annotated)
             key = cv2.waitKey(1) & 0xFF
@@ -103,6 +117,7 @@ def run_interactive_collector():
                     recording = True
                     recorded_frames.clear()
                     recorded_features.clear()
+                    recorded_times.clear()
                     print(f"Started recording for {current_gloss}...")
                 else:
                     recording = False

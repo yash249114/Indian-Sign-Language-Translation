@@ -268,7 +268,7 @@
                 </div>
                 <div class="modal-body">
                     <p style="font-size: 0.85rem; color: var(--text-secondary);">
-                        Record 30-frame multi-hand sign clips to expand the ISL word dataset.
+                        Record a 30-frame multi-hand landmark sequence (about 2 s) per sample. A sample counts only when the server confirms it was saved.
                         Splits are partitioned strictly by Signer ID to eliminate cross-signer leakage.
                     </p>
                     <div class="modal-row">
@@ -310,6 +310,10 @@
                                 <option value="two-handed">Two-handed</option>
                             </select>
                         </div>
+                    </div>
+                    <div class="modal-row" style="flex-direction: column; gap: 0.35rem; font-size: 0.82rem;">
+                        <label><input id="consentCheckbox" type="checkbox"> The signer agrees to their hand-landmark recording being stored and used for academic ISL research (required).</label>
+                        <label><input id="videoConsentCheckbox" type="checkbox"> Also save the .webm video clip (shows face and background; optional, needs separate consent).</label>
                     </div>
                     <div style="margin-top: 0.5rem;">
                         <span id="recordStatusTxt" style="font-weight: 600; font-size: 0.85rem; color: var(--text-secondary);">Ready to record 30-frame sample.</span>

@@ -50,6 +50,8 @@ archive/
 *.tar.gz
 data/word_dataset/clips/*.mp4
 data/word_dataset/clips/*.avi
+data/word_dataset/clips/*.webm
+data/word_dataset/**/*.part
 
 # IDE & OS files
 .vscode/

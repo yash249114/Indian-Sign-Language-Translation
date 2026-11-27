@@ -31,7 +31,7 @@ from backend.app.translation import translator, LANGUAGE_MAP
 from tts.tts_engine import tts_engine
 
 # Word-Level, Multi-Hand & ISL Grammar Modules
-from backend.app.collector import collector, load_vocabulary
+from backend.app.collector import collector, load_vocabulary, ClipValidationError
 from backend.app.isl_grammar import isl_grammar_engine, GlossToken, InterpretationResult
 from vision.hand_tracking.multi_hand_tracker import MultiHandTracker
 from vision.temporal.segmenter import TemporalSegmenter
@@ -110,6 +110,12 @@ def decode_base64_image(base64_str: str) -> Optional[np.ndarray]:
         return None
 
 
+def collect_payload(track_res: Dict[str, Any]) -> Dict[str, Any]:
+    """126D multi-hand feature vector for the dataset collector."""
+    fv = np.asarray(track_res["feature_vector"], dtype=np.float32).reshape(-1)
+    return {"collect_features": [round(float(x), 6) for x in fv], "collect_detected": bool(track_res["detected"])}
+
+
 def encode_image_to_base64(image_bgr: np.ndarray) -> str:
     """Encodes OpenCV BGR image to base64 JPEG data string."""
     _, buffer = cv2.imencode(".jpg", image_bgr, [cv2.IMWRITE_JPEG_QUALITY, 80])
@@ -149,12 +155,18 @@ class FrameRequest(BaseModel):
 class ClipRecordRequest(BaseModel):
     gloss: str
     signer_id: str
-    handedness: Optional[str] = "one-handed"
-    lighting: Optional[str] = "normal"
-    distance: Optional[str] = "normal"
-    background: Optional[str] = "plain"
+    consent: bool = False
+    video_consent: bool = False
+    landmarks_features: List[List[float]]
+    frame_timestamps_ms: Optional[List[float]] = None
+    fps: float = 15.0
+    video_base64: Optional[str] = None
+    handedness: str = "one-handed"
+    lighting: str = "normal"
+    distance: str = "normal"
+    background: str = "plain"
+    signing_speed: str = "normal"
     notes: Optional[str] = ""
-    landmarks_features: Optional[List[List[float]]] = None
 
 
 # =============================================================================
@@ -252,22 +264,40 @@ def get_dataset_manifest():
 
 @app.post("/api/dataset/record-clip")
 def record_dataset_clip(req: ClipRecordRequest):
-    """Registers a newly collected sign clip or landmark sequence."""
-    feat_data = None
-    if req.landmarks_features:
-        feat_data = {"features": np.array(req.landmarks_features, dtype=np.float32)}
-
-    entry = collector.record_clip(
-        gloss=req.gloss,
-        signer_id=req.signer_id,
-        landmarks_data=feat_data,
-        handedness=req.handedness or "one-handed",
-        lighting=req.lighting or "normal",
-        distance=req.distance or "normal",
-        background=req.background or "plain",
-        notes=req.notes or ""
-    )
-    return {"status": "success", "clip": entry}
+    """Validates and persists a 30x126 landmark sequence (+ optional consented .webm).
+    Returns status "saved" only after the files were written and read back."""
+    clip_bytes = None
+    if req.video_base64:
+        b64 = req.video_base64.split(",", 1)[1] if req.video_base64.startswith("data:") else req.video_base64
+        try:
+            clip_bytes = base64.b64decode(b64, validate=True)
+        except Exception:
+            raise HTTPException(status_code=422, detail="video_base64 is not valid base64")
+    try:
+        entry = collector.record_clip(
+            gloss=req.gloss,
+            signer_id=req.signer_id,
+            features=req.landmarks_features,
+            consent=req.consent,
+            clip_bytes=clip_bytes,
+            video_consent=req.video_consent,
+            handedness=req.handedness,
+            lighting=req.lighting,
+            distance=req.distance,
+            background=req.background,
+            signing_speed=req.signing_speed,
+            fps=req.fps,
+            frame_timestamps_ms=req.frame_timestamps_ms,
+            source="browser_collector",
+            notes=req.notes or ""
+        )
+    except ClipValidationError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+    except Exception as e:
+        print(f"[Collector] Save failed: {e}")
+        raise HTTPException(status_code=500, detail=f"sample not saved: {e}")
+    return {"status": "saved", "verified": True, "clip": entry,
+            "total_clips": collector.get_manifest()["total_clips"]}
 
 
 @app.post("/api/translate")
@@ -601,6 +631,7 @@ async def websocket_stream_endpoint(websocket: WebSocket):
                     "translated_text": current_translation,
                     "target_lang": client_target_lang,
                     "annotated_frame_base64": annotated_b64,
+                    **(collect_payload(track_res) if msg.get("collect_features") else {}),
                     "telemetry": {
                         "model_inference_ms": inference_ms,
                         "mediapipe_tracking_ms": tracking_ms,
@@ -641,6 +672,7 @@ async def websocket_stream_endpoint(websocket: WebSocket):
                     "translated_text": current_translation,
                     "target_lang": client_target_lang,
                     "annotated_frame_base64": annotated_b64,
+                    **(collect_payload(multi_tracker.process_frame(frame)) if msg.get("collect_features") else {}),
                     "telemetry": {
                         "model_inference_ms": det_res.get("model_time_ms", 0.0),
                         "mediapipe_tracking_ms": det_res.get("mediapipe_time_ms", 0.0),
