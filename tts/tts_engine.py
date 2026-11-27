@@ -17,6 +17,10 @@ if PROJECT_ROOT not in sys.path:
 CACHE_DIR = os.path.join(PROJECT_ROOT, "tts", "cache")
 
 
+# Size of a WAV file that holds only the RIFF header and no samples (plus slack).
+EMPTY_WAV_BYTES = 1024
+
+
 class TTSEngine(ABC):
     """Abstract interface for offline Text-to-Speech synthesis."""
 
@@ -69,6 +73,21 @@ class LocalOfflineTTSEngine(TTSEngine):
             # Save audio to file for web streaming
             engine.save_to_file(text, output_filepath)
             engine.runAndWait()
+
+            # A header-only WAV means no installed voice could render the text
+            # (e.g. Telugu text with English-only system voices). Report it instead
+            # of returning a silent file, so the client can use another voice.
+            if not os.path.exists(output_filepath) or os.path.getsize(output_filepath) <= EMPTY_WAV_BYTES:
+                if os.path.exists(output_filepath):
+                    os.remove(output_filepath)
+                return {
+                    "success": False,
+                    "text": text,
+                    "language": language,
+                    "audio_file": None,
+                    "engine": self.engine_name,
+                    "error": "No installed offline voice could render this text"
+                }
 
             return {
                 "success": True,

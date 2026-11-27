@@ -244,7 +244,12 @@ body {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transform: scaleX(-1); /* Mirror view */
+}
+
+/* Mirror only the raw webcam preview. The annotated overlay is drawn server-side with
+   text labels, so mirroring it would render the prediction label backwards. */
+#webcam {
+    transform: scaleX(-1);
 }
 
 #annotatedOverlay {
@@ -969,3 +974,13 @@ input:checked + .slider::before {
 }
 
 
+
+.model-status-banner {
+    margin: 0 0 12px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(245, 158, 11, 0.5);
+    background: rgba(245, 158, 11, 0.12);
+    color: #f59e0b;
+    font-size: 0.9rem;
+}

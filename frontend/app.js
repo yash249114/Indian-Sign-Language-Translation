@@ -110,6 +110,25 @@ document.addEventListener("DOMContentLoaded", () => {
     // =========================================================================
     // Mode Switching Logic
     // =========================================================================
+    const wordModelStatusBanner = document.getElementById("wordModelStatusBanner");
+    const wordModelStatusTxt = document.getElementById("wordModelStatusTxt");
+    let wordModelValidated = false;
+
+    async function fetchWordModelStatus() {
+        try {
+            const resp = await fetch("/api/health");
+            const st = (await resp.json()).word_model_status || {};
+            wordModelValidated = st.validated === true;
+            if (wordModelStatusTxt) wordModelStatusTxt.textContent = st.label || "Reference model, not validated";
+        } catch (e) {}
+        updateWordModelBanner();
+    }
+
+    function updateWordModelBanner() {
+        if (!wordModelStatusBanner) return;
+        wordModelStatusBanner.style.display = (currentMode !== "fingerspelling" && !wordModelValidated) ? "block" : "none";
+    }
+
     function setMode(newMode) {
         currentMode = newMode;
         [modeFingerspellingBtn, modeWordBtn, modeContinuousBtn].forEach(b => b.classList.remove("active"));
@@ -134,8 +153,11 @@ document.addEventListener("DOMContentLoaded", () => {
             glyphLabel.textContent = "Active Gloss Sign";
         }
 
+        updateWordModelBanner();
         sendAction("set_mode", { target_mode: newMode });
     }
+
+    fetchWordModelStatus();
 
     modeFingerspellingBtn.addEventListener("click", () => setMode("fingerspelling"));
     modeWordBtn.addEventListener("click", () => setMode("word"));
@@ -558,6 +580,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Offline Text-to-Speech & Replay
     speakBtn.addEventListener("click", async () => {
         let textToSpeak = translatedDisplay.classList.contains("placeholder") ? "" : translatedDisplay.textContent.trim();
+        let speakLang = textToSpeak ? targetLangSelect.value : "en";
         if (!textToSpeak) {
             textToSpeak = currentMode === "fingerspelling" ?
                 (fullTextDisplay.classList.contains("placeholder") ? "" : fullTextDisplay.textContent.trim()) :
@@ -572,19 +595,20 @@ document.addEventListener("DOMContentLoaded", () => {
             const resp = await fetch("/api/tts", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ text: textToSpeak, language: "en" })
+                body: JSON.stringify({ text: textToSpeak, language: speakLang })
             });
             const data = await resp.json();
 
             if (data.audio_file) {
                 lastAudioUrl = data.audio_file + `?t=${Date.now()}`;
                 ttsAudio.src = lastAudioUrl;
-                ttsAudio.play().catch(() => speakBrowserFallback(textToSpeak));
+                ttsAudio.play().catch(() => speakBrowserFallback(textToSpeak, speakLang));
             } else {
-                speakBrowserFallback(textToSpeak);
+                // No offline voice for this script: try the browser's voices for the target language.
+                speakBrowserFallback(textToSpeak, speakLang);
             }
         } catch (err) {
-            speakBrowserFallback(textToSpeak);
+            speakBrowserFallback(textToSpeak, speakLang);
         } finally {
             speakBtn.disabled = false;
             speakBtn.innerHTML = `<span class="btn-icon">🔊</span> Synthesize Speech (Local Offline TTS)`;
@@ -600,9 +624,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    function speakBrowserFallback(text) {
+    const BCP47 = { en: "en-IN", te: "te-IN", hi: "hi-IN", ta: "ta-IN", kn: "kn-IN", ml: "ml-IN", bn: "bn-IN", mr: "mr-IN", gu: "gu-IN" };
+
+    function speakBrowserFallback(text, lang = "en") {
         if ("speechSynthesis" in window) {
             const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = BCP47[lang] || "en-IN";
             window.speechSynthesis.speak(utterance);
         }
     }

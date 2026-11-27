@@ -19,6 +19,7 @@ if PROJECT_ROOT not in sys.path:
 
 from models.temporal.architectures import TemporalCNN, BiGRUClassifier
 from backend.app.collector import load_vocabulary
+from training.temporal_data import checkpoint_status
 
 VOCAB_LIST = [item["gloss"] for item in load_vocabulary()]
 if not VOCAB_LIST:
@@ -45,6 +46,7 @@ class WordSignPredictor:
 
         self.weights_path = weights_path or WEIGHTS_PATH
         self.is_trained = False
+        self.checkpoint_metadata: Dict[str, Any] = {}
 
         if os.path.exists(self.weights_path):
             try:
@@ -52,6 +54,7 @@ class WordSignPredictor:
                 if isinstance(ckpt, dict) and "state_dict" in ckpt:
                     self.model.load_state_dict(ckpt["state_dict"])
                     self.classes = ckpt.get("classes", self.classes)
+                    self.checkpoint_metadata = dict(ckpt.get("metadata") or {k: v for k, v in ckpt.items() if k != "state_dict"})
                 else:
                     self.model.load_state_dict(ckpt)
                 self.is_trained = True
@@ -61,6 +64,20 @@ class WordSignPredictor:
 
         self.model.to(self.device)
         self.model.eval()
+
+    def model_status(self) -> Dict[str, Any]:
+        """Truthful status of the loaded temporal model. Checkpoints without metadata count as reference models."""
+        st = checkpoint_status(self.checkpoint_metadata)
+        if not self.is_trained:
+            st.update(status="not_loaded", label="No temporal model loaded", validated=False)
+        st.update(
+            weights_path=os.path.relpath(self.weights_path, PROJECT_ROOT),
+            architecture=self.architecture,
+            classes=self.classes,
+            feature_dim=self.checkpoint_metadata.get("feature_dim", self.checkpoint_metadata.get("in_features", 126)),
+            sequence_length=self.checkpoint_metadata.get("sequence_length", 30),
+        )
+        return st
 
     def predict_window(self, window_features: np.ndarray) -> Tuple[str, float, List[Dict[str, Any]]]:
         """
