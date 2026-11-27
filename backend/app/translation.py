@@ -10,6 +10,7 @@ Features:
 """
 
 import os
+import re
 import sys
 import time
 import json
@@ -88,6 +89,15 @@ SYSTEM_INSTRUCTION = (
     "Do not add information.\n"
     "Return ONLY the translated text."
 )
+
+
+_INDIC = "ऀ-෿"
+_MIXED_SCRIPT_RE = re.compile(f"[{_INDIC}][A-Za-z]|[A-Za-z][{_INDIC}]")
+
+
+def has_mixed_script_tokens(text: str) -> bool:
+    """True when a Latin letter is fused directly onto an Indic-script character inside a word."""
+    return bool(_MIXED_SCRIPT_RE.search(text or ""))
 
 
 class TranslationCache:
@@ -273,29 +283,47 @@ class GeminiTranslationEngine:
         }
 
         try:
-            response = requests.post(url, headers=headers, json=payload, timeout=self.timeout)
+            # Up to two attempts: a model reply with Latin letters fused into Indic words
+            # (e.g. "వీdడ్కోలు") is rejected, never cached, and retried once.
+            translated_text = None
+            for attempt in range(2):
+                response = requests.post(url, headers=headers, json=payload, timeout=self.timeout)
+                if response.status_code != 200:
+                    break
+                translated_text = self._extract_text(response.json())
+                if translated_text and not has_mixed_script_tokens(translated_text):
+                    break
+                translated_text = None
+
+            if response.status_code == 200 and not translated_text:
+                with self._lock:
+                    self.failed_requests += 1
+                fallback = OFFLINE_LEXICON.get(clean_text.upper(), {}).get(tgt_code)
+                return {
+                    "translated_text": fallback or "Translation unavailable (model returned malformed text)",
+                    "source_language": src_code,
+                    "target_language": tgt_code,
+                    "model": "offline_lexicon_fallback" if fallback else self.model_name,
+                    "cached": False,
+                    "status": "offline_fallback" if fallback else "invalid_output",
+                    "latency_ms": round((time.perf_counter() - t0) * 1000.0, 2)
+                }
 
             if response.status_code == 200:
-                data = response.json()
-                candidates = data.get("candidates", [])
-                if candidates:
-                    parts = candidates[0].get("content", {}).get("parts", [])
-                    if parts:
-                        translated_text = parts[0].get("text", "").strip()
-                        # Cache translation
-                        self.cache.set(clean_text, src_code, tgt_code, translated_text)
-                        with self._lock:
-                            self.translation_calls_today += 1
+                # Cache translation
+                self.cache.set(clean_text, src_code, tgt_code, translated_text)
+                with self._lock:
+                    self.translation_calls_today += 1
 
-                        return {
-                            "translated_text": translated_text,
-                            "source_language": src_code,
-                            "target_language": tgt_code,
-                            "model": self.model_name,
-                            "cached": False,
-                            "status": "success",
-                            "latency_ms": round((time.perf_counter() - t0) * 1000.0, 2)
-                        }
+                return {
+                    "translated_text": translated_text,
+                    "source_language": src_code,
+                    "target_language": tgt_code,
+                    "model": self.model_name,
+                    "cached": False,
+                    "status": "success",
+                    "latency_ms": round((time.perf_counter() - t0) * 1000.0, 2)
+                }
 
             elif response.status_code == 429:
                 with self._lock:
@@ -346,6 +374,14 @@ class GeminiTranslationEngine:
                 "status": "exception",
                 "latency_ms": round((time.perf_counter() - t0) * 1000.0, 2)
             }
+
+    @staticmethod
+    def _extract_text(data: Dict[str, Any]) -> str:
+        candidates = data.get("candidates", [])
+        if not candidates:
+            return ""
+        parts = candidates[0].get("content", {}).get("parts", [])
+        return parts[0].get("text", "").strip() if parts else ""
 
     def translate_gloss_sequence(
         self,

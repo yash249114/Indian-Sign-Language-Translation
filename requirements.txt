@@ -8,9 +8,10 @@ joblib==1.4.2
 requests==2.32.5
 python-dotenv==1.0.1
 pyttsx3==2.90
-pytest==8.2.2
+pytest==8.4.2
 pytest-asyncio==1.4.0
 anyio==3.7.1
 torch==2.9.1
 pydantic==2.10.3
 websockets==14.1
+httpx==0.28.1

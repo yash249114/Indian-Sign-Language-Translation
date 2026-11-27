@@ -179,3 +179,42 @@ def test_api_stats_endpoint_includes_telemetry():
     tel = data["translation_telemetry"]
     assert "translation_calls_today" in tel
     assert "cached_translations" in tel
+
+
+def _gemini_reply(text):
+    resp = MagicMock()
+    resp.status_code = 200
+    resp.json.return_value = {"candidates": [{"content": {"parts": [{"text": text}]}}]}
+    return resp
+
+
+def test_mixed_script_detector():
+    from backend.app.translation import has_mixed_script_tokens
+    assert has_mixed_script_tokens("వీdడ్కోలు")
+    assert has_mixed_script_tokens("अलdविदा")
+    assert not has_mixed_script_tokens("వీడ్కోలు")
+    assert not has_mixed_script_tokens("KL విశ్వవిద్యాలయం")  # separate Latin word is allowed
+    assert not has_mixed_script_tokens("Goodbye")
+
+
+def test_malformed_reply_is_retried_and_not_cached():
+    engine = GeminiTranslationEngine(api_key="mock_api_key")
+    with patch("requests.post") as mock_post:
+        mock_post.side_effect = [_gemini_reply("వీdడ్కోలు"), _gemini_reply("వీడ్కోలు")]
+        res = engine.translate("BYE", "en", "te")
+        assert mock_post.call_count == 2
+        assert res["status"] == "success"
+        assert res["translated_text"] == "వీడ్కోలు"
+
+
+def test_persistently_malformed_reply_falls_back_without_caching():
+    engine = GeminiTranslationEngine(api_key="mock_api_key")
+    with patch("requests.post") as mock_post:
+        mock_post.return_value = _gemini_reply("సహాయంd")
+        res = engine.translate("HELP", "en", "te")
+        assert mock_post.call_count == 2
+        assert res["status"] == "offline_fallback"
+        assert res["cached"] is False
+        assert engine.cache.get("HELP", "en", "te") is None
+        res2 = engine.translate("BYE", "en", "te")
+        assert res2["status"] == "invalid_output"
